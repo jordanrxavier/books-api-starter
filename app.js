@@ -1,3 +1,5 @@
+const db = require("./db");
+//connect one level over
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
@@ -7,6 +9,8 @@ const cors = require("cors");
 
 const app = express();
 const PORT = 8080;
+
+db.authenticate().then(() => console.log("DB connected")).catch(console.error)
 
 // middleware ---------------------------------------
 app.use(express.json()); // lets the server read JSON sent in a request body (req.body)
@@ -147,3 +151,4 @@ async function startApp() {
 }
 
 startApp();
+
