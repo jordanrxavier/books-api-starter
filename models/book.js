@@ -18,6 +18,6 @@ const Book = dbConnection.define('book', {
 })
 //Explain: you didn't define an id field anywhere in the table above.
 //Where does it come from, and what does it default to?
-//It comes from books in app.js
+//Sequelize adds it automatically: an auto-incrementing integer primary key, starting at 1.
 
 module.exports = Book
