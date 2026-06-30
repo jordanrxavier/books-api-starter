@@ -1,5 +1,5 @@
 const dbConnection = require("./db");
-const bookModels = require("./models/book")
+const { Book, Review } = require("./models/index")
 //connect one level over
 const express = require("express");
 const morgan = require("morgan");
@@ -30,7 +30,7 @@ app.get("/", (request, response) => {
 // TODO: Workshop: swap `books` for the Book method that returns every row.
 app.get("/api/books", async (request, response, next) => {
   try {
-    const books = await bookModels.findAll()
+    const books = await Book.findAll()
     response.json(books);
   } catch (error) {
     next(error);
@@ -43,7 +43,10 @@ app.get("/api/books", async (request, response, next) => {
 app.get("/api/books/:id", async (request, response, next) => {
   try {
     const id = Number(request.params.id); // request.params.id is always a string — Number() makes it comparable
-    const book = await bookModels.findByPk(id);
+    const book = await Book.findByPk(id, {
+      include: Review
+    }
+    );
 
     if (!book) {
       return response.sendStatus(404);
@@ -63,7 +66,7 @@ app.post("/api/books", async (request, response, next) => {
   try {
     const { title, author, genre } = request.body;
 
-    const newBook = await bookModels.create({ title, author, genre })
+    const newBook = await Book.create({ title, author, genre })
 
     response.status(201).json(newBook);
   } catch (error) {
@@ -77,7 +80,7 @@ app.post("/api/books", async (request, response, next) => {
 app.patch("/api/books/:id", async (request, response, next) => {
   try {
     const id = Number(request.params.id);
-    const book = await bookModels.findByPk(id);
+    const book = await Book.findByPk(id);
 
     if (!book) {
       return response.sendStatus(404);
@@ -97,7 +100,7 @@ app.patch("/api/books/:id", async (request, response, next) => {
 app.delete("/api/books/:id", async (request, response, next) => {
   try {
     const id = Number(request.params.id);
-    const book = await bookModels.findByPk(id);
+    const book = await Book.findByPk(id);
 
     if (!book) {
       return response.sendStatus(404);
@@ -110,6 +113,21 @@ app.delete("/api/books/:id", async (request, response, next) => {
     next(error);
   }
 });
+
+app.post("/api/books/:bookId/reviews", async (request, response) => {
+  const id = Number(request.params.bookId)
+
+  const review = {
+    reviewer: request.body.reviewer,
+    rating: request.body.rating,
+    comment: request.body.comment,
+    bookId: id
+  }
+
+  await Review.create(review)
+  response.status(201).json(review)
+
+})
 
 // TODO: Workshop cleanup: once all five routes above use Book instead of `books`,
 // delete the `books` array and `nextId` variable up top — nothing should
